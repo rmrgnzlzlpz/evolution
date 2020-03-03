@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Infraestructura.Utils
 {
-    public class UnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly IDbContext context = new PruebaContext("Data Source=localhost;Initial Catalog=evolution;Integrated Security=True");
 

@@ -29,6 +29,7 @@ namespace Infraestructura.Utils
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
@@ -41,36 +42,44 @@ namespace Infraestructura.Utils
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
 
-        public int ModifierQuery(IDbCommand sqlCommand)
-        {
-            sqlCommand.Connection = _sqlConnection;
-            sqlCommand.Transaction = _sqlConnection.BeginTransaction();
-            int count = sqlCommand.ExecuteNonQuery();
-            sqlCommand.Transaction.Commit();
-            return count;
-        }
-
         private IEnumerable<IDataRecord> Get(IDbCommand sqlCommand)
         {
+            if (!Open()) yield return null;
             sqlCommand.Connection = _sqlConnection;
             IDataReader reader = sqlCommand.ExecuteReader();
             while (reader.Read())
             {
                 yield return reader;
             }
+            Close();
         }
 
         public int Delete(IDbCommand sqlCommand)
         {
-            sqlCommand.Connection = _sqlConnection;
-            sqlCommand.Transaction = _sqlConnection.BeginTransaction();
-            int count = sqlCommand.ExecuteNonQuery();
-            sqlCommand.Transaction.Commit();
-            return count;
+            try
+            {
+                if (!Open()) return 0;
+                sqlCommand.Connection = _sqlConnection;
+                sqlCommand.Transaction = _sqlConnection.BeginTransaction();
+                int count = sqlCommand.ExecuteNonQuery();
+                sqlCommand.Transaction.Commit();
+                return count;
+            }
+            catch (Exception e)
+            {
+                sqlCommand.Transaction.Rollback();
+                Console.WriteLine(e.Message);
+                return 0;
+            }
+            finally
+            {
+                Close();
+            }
         }
 
         public IDataRecord Insert(IDbCommand sqlCommand)
