@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Text;
+using System.Linq;
 
 namespace Infraestructura.Repositories
 {
@@ -13,18 +14,22 @@ namespace Infraestructura.Repositories
         public UserRepository(IDbContext context) : base(context) { }
         public User Add(User entity)
         {
-            SqlCommand sqlCommand = new SqlCommand("INSERT INTO dbo.users (username, password, role_id, firstname, lastname, state) VALUES (@username, @password, @role_id, @firstname, @lastname, @state)");
-            sqlCommand.Parameters.AddWithValue("@username", entity.Username);
-            sqlCommand.Parameters.AddWithValue("@password", entity.Password);
-            sqlCommand.Parameters.AddWithValue("@role_id", entity.RoleId);
-            sqlCommand.Parameters.AddWithValue("@firstname", entity.Firstname);
-            sqlCommand.Parameters.AddWithValue("@lastname", entity.Lastname);
-            sqlCommand.Parameters.AddWithValue("@state", entity.State);
-            if (_context.ModifierQuery(sqlCommand) > 0)
+            try
             {
-                return entity;
+                SqlCommand sqlCommand = new SqlCommand("INSERT INTO dbo.users (username, password, role_id, firstname, lastname, state) OUTPUT INSERTED.* VALUES (@username, @password, @role_id, @firstname, @lastname, @state)");
+                sqlCommand.Parameters.AddWithValue("@username", entity.Username);
+                sqlCommand.Parameters.AddWithValue("@password", entity.Password);
+                sqlCommand.Parameters.AddWithValue("@role_id", entity.RoleId);
+                sqlCommand.Parameters.AddWithValue("@firstname", entity.Firstname);
+                sqlCommand.Parameters.AddWithValue("@lastname", entity.Lastname);
+                sqlCommand.Parameters.AddWithValue("@state", entity.State);
+                return new User(_context.Insert(sqlCommand));
             }
-            return null;
+            catch (Exception e)
+            {
+                System.Console.WriteLine(e.Message);
+                return null;
+            }
         }
 
         public int AddRange(IList<User> entities)
@@ -40,9 +45,16 @@ namespace Infraestructura.Repositories
 
         public int Delete(long id)
         {
-            SqlCommand sqlCommand = new SqlCommand("DELETE FROM dbo.users WHERE id = @id");
-            sqlCommand.Parameters.AddWithValue("@id", id);
-            return _context.ModifierQuery(sqlCommand);
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("DELETE FROM dbo.users WHERE id = @id");
+                sqlCommand.Parameters.AddWithValue("@id", id);
+                return _context.Delete(sqlCommand);
+            }
+            catch (Exception e)
+            {
+                return 0;
+            }
         }
 
         public int DeleteRange(IList<User> entities)
@@ -58,46 +70,58 @@ namespace Infraestructura.Repositories
 
         public User Edit(User entity)
         {
-            SqlCommand sqlCommand = new SqlCommand("UPDATE dbo.users SET username = @username, password = @password, role_id = @role_id, firstname = @firstname, lastname = @lastname, state = @state WHERE id = @id");
-            sqlCommand.Parameters.AddWithValue("@username", entity.Username);
-            sqlCommand.Parameters.AddWithValue("@password", entity.Password);
-            sqlCommand.Parameters.AddWithValue("@role_id", entity.RoleId);
-            sqlCommand.Parameters.AddWithValue("@firstname", entity.Firstname);
-            sqlCommand.Parameters.AddWithValue("@lastname", entity.Lastname);
-            sqlCommand.Parameters.AddWithValue("@state", entity.State);
-            sqlCommand.Parameters.AddWithValue("@id", entity.Id);
-            if (_context.ModifierQuery(sqlCommand) > 0)
-            {
-                return entity;
-            }
-            return null;
+           try
+           {
+                SqlCommand sqlCommand = new SqlCommand("UPDATE dbo.users SET username = @username, password = @password, role_id = @role_id, firstname = @firstname, lastname = @lastname, state = @state WHERE id = @id");
+                sqlCommand.Parameters.AddWithValue("@username", entity.Username);
+                sqlCommand.Parameters.AddWithValue("@password", entity.Password);
+                sqlCommand.Parameters.AddWithValue("@role_id", entity.RoleId);
+                sqlCommand.Parameters.AddWithValue("@firstname", entity.Firstname);
+                sqlCommand.Parameters.AddWithValue("@lastname", entity.Lastname);
+                sqlCommand.Parameters.AddWithValue("@state", entity.State);
+                sqlCommand.Parameters.AddWithValue("@id", entity.Id);
+                return new User(_context.Update(sqlCommand));
+           }
+           catch (Exception e)
+           {
+               return null;
+           }
         }
 
         public User Find(long id)
         {
-            User entity = null;
-            SqlCommand sqlCommand = new SqlCommand("SELECT * FROM dbo.users WHERE id = @id");
-            sqlCommand.Parameters.AddWithValue("@id", id);
-            var data = _context.Select(sqlCommand);
-            foreach (var row in data)
+            try
             {
-                entity = new User
-                {
-                    Id = long.Parse(row["id"].ToString()),
-                    Firstname = row["firstname"].ToString(),
-                    Lastname = row["lastname"].ToString(),
-                    Password = row["password"].ToString(),
-                    RoleId = long.Parse(row["role_id"].ToString()),
-                    State = (UserState)Convert.ToInt32(row["state"]),
-                    Username = row["username"].ToString()
-                };
+                SqlCommand sqlCommand = new SqlCommand("SELECT * FROM dbo.users WHERE id = @id");
+                sqlCommand.Parameters.AddWithValue("@id", id);
+                return new User(_context.Find(sqlCommand));
             }
-            return entity;
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
-        public IList<User> GetAll(int pageIndex = 0, int pageSize = 10)
+        public IList<User> GetAll(int pageIndex = 1, int pageSize = 10)
         {
-            throw new NotImplementedException();
+            try
+            {
+                int start = (pageIndex - 1) * pageSize;
+                IList<User> users = new List<User>();
+                SqlCommand sqlCommand = new SqlCommand("SELECT * FROM dbo.users OFFSET @inicio ROWS FETCH NEXT @size ROWS ONLY");
+                sqlCommand.Parameters.AddWithValue("@inicio", start);
+                sqlCommand.Parameters.AddWithValue("@size", pageSize);
+                var data = _context.Select(sqlCommand);
+                foreach (var row in data)
+                {
+                    users.Add(new User(row));
+                }
+                return users;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
     }
 }

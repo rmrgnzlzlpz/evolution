@@ -18,8 +18,8 @@ namespace TestContext
         {
             Role role = new Role
             {
-                Name = "Rol de Prueba",
-                Description = "Descripción de Rol de Prueba",
+                Name = "Rol de Prueba 2",
+                Description = "Descripción de Rol de Prueba 2",
                 State = RoleState.Active
             };
             unitOfWork.Init();
@@ -34,16 +34,16 @@ namespace TestContext
             unitOfWork.Init();
             User user = new User
             {
-                Username = "rmrgnzlz",
+                Username = "Kenneth",
                 Password = "qwertyuiop",
-                Firstname = "Ramiro",
-                Lastname = "González",
+                Firstname = "Kenneth",
+                Lastname = "Mendoza",
                 RoleId = 8,
                 State = UserState.Active
             };
             User savedUser = unitOfWork.UserRepository.Add(user);
             unitOfWork.Save();
-            Assert.AreEqual(user, savedUser);
+            Assert.IsNotNull(savedUser);
         }
 
         [Test]

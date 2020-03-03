@@ -1,15 +1,19 @@
-﻿using Infraestructura.Interfaces;
+﻿using Domain;
+using Domain.Entities;
+using Domain.Interfaces;
+using Infraestructura.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text;
 
 namespace Infraestructura.Utils
 {
     public class PruebaContext : IDbContext
     {
-        public readonly SqlConnection _sqlConnection;
+        public readonly IDbConnection _sqlConnection;
 
         public PruebaContext(string stringConnection)
         {
@@ -41,7 +45,7 @@ namespace Infraestructura.Utils
             }
         }
 
-        public int ModifierQuery(SqlCommand sqlCommand)
+        public int ModifierQuery(IDbCommand sqlCommand)
         {
             sqlCommand.Connection = _sqlConnection;
             sqlCommand.Transaction = _sqlConnection.BeginTransaction();
@@ -50,7 +54,7 @@ namespace Infraestructura.Utils
             return count;
         }
 
-        public IEnumerable<IDataRecord> Select(SqlCommand sqlCommand)
+        private IEnumerable<IDataRecord> Get(IDbCommand sqlCommand)
         {
             sqlCommand.Connection = _sqlConnection;
             IDataReader reader = sqlCommand.ExecuteReader();
@@ -58,6 +62,35 @@ namespace Infraestructura.Utils
             {
                 yield return reader;
             }
+        }
+
+        public int Delete(IDbCommand sqlCommand)
+        {
+            sqlCommand.Connection = _sqlConnection;
+            sqlCommand.Transaction = _sqlConnection.BeginTransaction();
+            int count = sqlCommand.ExecuteNonQuery();
+            sqlCommand.Transaction.Commit();
+            return count;
+        }
+
+        public IDataRecord Insert(IDbCommand sqlCommand)
+        {
+            return Get(sqlCommand).FirstOrDefault();
+        }
+
+        public IDataRecord Update(IDbCommand sqlCommand)
+        {
+            return Get(sqlCommand).FirstOrDefault();
+        }
+
+        public IDataRecord Find(IDbCommand sqlCommand)
+        {
+            return Get(sqlCommand).FirstOrDefault();
+        }
+
+        public IEnumerable<IDataRecord> Select(IDbCommand sqlCommand)
+        {
+            return Get(sqlCommand);
         }
     }
 }

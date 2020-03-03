@@ -2,6 +2,7 @@
 using Infraestructura.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Text;
 
@@ -9,16 +10,20 @@ namespace Infraestructura.Repositories
 {
     public class RoleRepository : GenericRepository, IRespository<Role>
     {
+        private IDbCommand _dbCommand;
         public RoleRepository(IDbContext context) : base(context) { }
         public Role Add(Role entity)
         {
-            SqlCommand sqlCommand = new SqlCommand("INSERT INTO dbo.roles (name, description, state) VALUES (@Name, @Description, @State)");
-            sqlCommand.Parameters.AddWithValue("@Name", entity.Name);
-            sqlCommand.Parameters.AddWithValue("@Description", entity.Description);
-            sqlCommand.Parameters.AddWithValue("@State", entity.State);
-            int count = _context.ModifierQuery(sqlCommand);
+            _dbCommand = new SqlCommand("INSERT INTO dbo.roles (name, description, state) VALUES (@name, @description, @state)");
+            IDbDataParameter parameter = _dbCommand.CreateParameter();
+            parameter.ParameterName = "@name";
+            parameter.Value = entity.Name;
 
-            return count > 0 ? entity : null;
+            _dbCommand.Parameters.Add(parameter);
+            //sqlCommand.Parameters.AddWithValue("@Name", entity.Name);
+            //sqlCommand.Parameters.AddWithValue("@Description", entity.Description);
+            //sqlCommand.Parameters.AddWithValue("@State", entity.State);
+            return new Role(_context.Insert(_dbCommand));
         }
 
         public void AddRange(IEnumerable<Role> entities)
