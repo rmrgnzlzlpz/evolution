@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Infraestructura.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -9,19 +9,19 @@ using System.Text;
 
 namespace Infraestructura.Repositories
 {
-    public class RoleRepository : GenericRepository, IRepository<Role>
+    public class RolePermissionRepository : GenericRepository, IRepository<RolePermission>
     {
+        private string tableName = "roles_permissions";
         private SqlCommand _dbCommand;
-        public RoleRepository(IDbContext context) : base(context) { }
-        public Role Add(Role entity)
+        public RolePermissionRepository(IDbContext context) : base(context) { }
+        public RolePermission Add(RolePermission entity)
         {
             try
             {
-                _dbCommand = new SqlCommand("INSERT INTO dbo.roles (name, description, state) OUTPUT INSERTED.* VALUES (@name, @description, @state)");
-                _dbCommand.Parameters.AddWithValue("@Name", entity.Name);
-                _dbCommand.Parameters.AddWithValue("@Description", entity.Description);
-                _dbCommand.Parameters.AddWithValue("@State", entity.State);
-                return new Role(_context.Insert(_dbCommand));
+                _dbCommand = new SqlCommand($"INSERT INTO dbo.{tableName} (role_id, permission_id) OUTPUT INSERTED.* VALUES (@role_id, @permission_id)");
+                _dbCommand.Parameters.AddWithValue("@role_id", entity.RoleId);
+                _dbCommand.Parameters.AddWithValue("@permission_id", entity.PermissionId);
+                return new RolePermission(_context.Insert(_dbCommand));
             }
             catch (Exception e)
             {
@@ -30,12 +30,12 @@ namespace Infraestructura.Repositories
             }
         }
 
-        public int AddRange(IList<Role> entities)
+        public int AddRange(IList<RolePermission> entities)
         {
             int count = 0;
-            foreach (Role role in entities)
+            foreach (RolePermission entity in entities)
             {
-                if (Add(role) == null) break;
+                if (Add(entity) == null) break;
                 count++;
             }
             return count;
@@ -45,7 +45,7 @@ namespace Infraestructura.Repositories
         {
             try
             {
-                _dbCommand = new SqlCommand("DELETE FROM dbo.roles WHERE id = @id");
+                _dbCommand = new SqlCommand($"DELETE FROM dbo.{tableName} WHERE id = @id");
                 _dbCommand.Parameters.AddWithValue("@id", id);
                 return _context.Delete(_dbCommand);
             }
@@ -56,31 +56,30 @@ namespace Infraestructura.Repositories
             }
         }
 
-        public int Delete(Role entity)
+        public int Delete(RolePermission entity)
         {
             return Delete(entity.Id);
         }
 
-        public int DeleteRange(IList<Role> entities)
+        public int DeleteRange(IList<RolePermission> entities)
         {
             int count = 0;
-            foreach (Role role in entities)
+            foreach (RolePermission entity in entities)
             {
-                if (Delete(role.Id) < 1) break;
+                if (Delete(entity.Id) < 1) break;
                 count++;
             }
             return count;
         }
 
-        public Role Edit(Role entity)
+        public RolePermission Edit(RolePermission entity)
         {
             try
             {
-                _dbCommand = new SqlCommand("UPDATE dbo.roles SET name = @name, description = @description, state = @state WHERE id = @id");
-                _dbCommand.Parameters.AddWithValue("@name", entity.Name);
-                _dbCommand.Parameters.AddWithValue("@description", entity.Description);
-                _dbCommand.Parameters.AddWithValue("@state", entity.State);
-                return new Role(_context.Update(_dbCommand));
+                _dbCommand = new SqlCommand($"UPDATE dbo.{tableName} SET role_id = @role_id, permission_id = @permission_id WHERE id = @id");
+                _dbCommand.Parameters.AddWithValue("@role_id", entity.RoleId);
+                _dbCommand.Parameters.AddWithValue("@permission_id", entity.PermissionId);
+                return new RolePermission(_context.Update(_dbCommand));
             }
             catch (Exception e)
             {
@@ -89,13 +88,13 @@ namespace Infraestructura.Repositories
             }
         }
 
-        public Role Find(long id)
+        public RolePermission Find(long id)
         {
             try
             {
-               _dbCommand = new SqlCommand("SELECT * FROM dbo.roles WHERE id = @id");
+               _dbCommand = new SqlCommand($"SELECT * FROM dbo.{tableName} WHERE id = @id");
                 _dbCommand.Parameters.AddWithValue("@id", id);
-                return new Role(_context.Find(_dbCommand));
+                return new RolePermission(_context.Find(_dbCommand));
             }
             catch (Exception e)
             {
@@ -104,18 +103,18 @@ namespace Infraestructura.Repositories
             }
         }
 
-        public IList<Role> FindBy(string name, object value)
+        public IList<RolePermission> FindBy(string name, object value)
         {
             if (!name.Replace("_", "").All(char.IsLetterOrDigit)) return null;
-            IList<Role> roles = new List<Role>();
+            IList<RolePermission> entities = new List<RolePermission>();
             try
             {
-                _dbCommand = new SqlCommand($"SELECT * FROM dbo.roles WHERE {name} = @value");
+                _dbCommand = new SqlCommand($"SELECT * FROM dbo.{tableName} WHERE {name} = @value");
                 _dbCommand.Parameters.AddWithValue("@value", value);
                 var data = _context.Select(_dbCommand);
                 foreach (var row in data)
                 {
-                    roles.Add(new Role(row));
+                    entities.Add(new RolePermission(row));
                 }
             }
             catch (Exception e)
@@ -123,24 +122,24 @@ namespace Infraestructura.Repositories
                 Console.WriteLine(e.Message);
                 return null;
             }
-            return roles;
+            return entities;
         }
 
-        public IList<Role> GetAll(int pageIndex = 0, int pageSize = 10)
+        public IList<RolePermission> GetAll(int pageIndex = 0, int pageSize = 10)
         {
             try
             {
                 int start = (pageIndex - 1) * pageSize;
-                IList<Role> roles = new List<Role>();
-                _dbCommand = new SqlCommand("SELECT * FROM dbo.roles OFFSET @inicio ROWS FETCH NEXT @size ROWS ONLY");
+                IList<RolePermission> entities = new List<RolePermission>();
+                _dbCommand = new SqlCommand($"SELECT * FROM dbo.{tableName} OFFSET @inicio ROWS FETCH NEXT @size ROWS ONLY");
                 _dbCommand.Parameters.AddWithValue("@inicio", start);
                 _dbCommand.Parameters.AddWithValue("@size", pageSize);
                 var data = _context.Select(_dbCommand);
                 foreach (var row in data)
                 {
-                    roles.Add(new Role(row));
+                    entities.Add(new RolePermission(row));
                 }
-                return roles;
+                return entities;
             }
             catch (Exception e)
             {

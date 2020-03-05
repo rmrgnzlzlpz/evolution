@@ -8,10 +8,17 @@ namespace Infraestructura.Utils
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly IDbContext context = new PruebaContext("Data Source=localhost;Initial Catalog=evolution;Integrated Security=True");
+        private readonly IDbContext context;
+
+        public UnitOfWork(string connection = "Data Source=localhost;Initial Catalog=evolution;Integrated Security=True")
+        {
+            context = new PruebaContext(connection);
+        }
 
         private RoleRepository roleRepository = null;
         private UserRepository userRepository = null;
+        private PermissionRepository permissionRepository = null;
+        private RolePermissionRepository rolePermissionRepository = null;
 
         public RoleRepository RoleRepository
         {
@@ -33,6 +40,30 @@ namespace Infraestructura.Utils
                     userRepository = new UserRepository(context);
                 }
                 return userRepository;
+            }
+        }
+
+        public PermissionRepository PermissionRepository
+        {
+            get
+            {
+                if (permissionRepository == null)
+                {
+                    permissionRepository = new PermissionRepository(context);
+                }
+                return permissionRepository;
+            }
+        }
+
+        public RolePermissionRepository RolePermissionRepository
+        {
+            get
+            {
+                if (rolePermissionRepository == null)
+                {
+                    rolePermissionRepository = new RolePermissionRepository(context);
+                }
+                return rolePermissionRepository;
             }
         }
 

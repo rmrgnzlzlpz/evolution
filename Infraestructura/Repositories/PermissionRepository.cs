@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Infraestructura.Repositories
 {
-    public class PermissionRepository : GenericRepository, IRespository<Permission>
+    public class PermissionRepository : GenericRepository, IRepository<Permission>
     {
         private SqlCommand _dbCommand;
         public PermissionRepository(IDbContext context) : base(context) { }
@@ -141,6 +141,27 @@ namespace Infraestructura.Repositories
                     entities.Add(new Permission(row));
                 }
                 return entities;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+        }
+
+        public IList<Permission> GetByRole(long id)
+        {
+            try
+            {
+                IList<Permission> permissions = new List<Permission>();
+                _dbCommand = new SqlCommand("SELECT permissions.* FROM permissions INNER JOIN roles_permissions ON permissions.id = roles_permissions.permission_id AND roles_permissions.role_id = @id");
+                _dbCommand.Parameters.AddWithValue("@id", id);
+                var data = _context.Select(_dbCommand);
+                foreach (var row in data)
+                {
+                    permissions.Add(new Permission(row));
+                }
+                return permissions;
             }
             catch (Exception e)
             {

@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Infraestructura.Utils;
 
 namespace Aplicacion.Services
 {
     public class UserService : Service<User>
     {
-        public UserService(IRespository<User> repository) : base(repository)
+        public UserService(UnitOfWork unitOfWork, IRepository<User> repository) : base(unitOfWork, repository)
         {
         }
 
@@ -38,6 +39,13 @@ namespace Aplicacion.Services
             User entity = ((_repository.FindBy("username", user.Username)) ?? new List<User>()).FirstOrDefault();
             if (entity == null) return null;
             return ValidatePassword(user, entity) ? entity : null;
+        }
+
+        public bool HasPermission(User user, string permission)
+        {
+            if (user == null) return false;
+            PermissionService permissionService = new PermissionService(_unitOfWork, _unitOfWork.PermissionRepository);
+            return permissionService.IsOfRole(user.RoleId, permission);
         }
     }
 }

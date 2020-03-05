@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Infraestructura.Repositories
 {
-    public class UserRepository : GenericRepository, IRespository<User>
+    public class UserRepository : GenericRepository, IRepository<User>
     {
         private SqlCommand _dbCommand;
         public UserRepository(IDbContext context) : base(context) { }
@@ -17,7 +17,6 @@ namespace Infraestructura.Repositories
         {
             try
             {
-                _context.Open();
                 _dbCommand = new SqlCommand("INSERT INTO dbo.users (username, password, role_id, firstname, lastname, state) OUTPUT INSERTED.* VALUES (@username, @password, @role_id, @firstname, @lastname, @state)");
                 _dbCommand.Parameters.AddWithValue("@username", entity.Username);
                 _dbCommand.Parameters.AddWithValue("@password", entity.Password);
@@ -122,7 +121,6 @@ namespace Infraestructura.Repositories
             IList<User> users = new List<User>();
             try
             {
-                _context.Open();
                 _dbCommand = new SqlCommand($"SELECT * FROM dbo.users WHERE {name} = @value");
                 _dbCommand.Parameters.AddWithValue("@value", value);
                 var data = _context.Select(_dbCommand);
@@ -130,17 +128,12 @@ namespace Infraestructura.Repositories
                 {
                     users.Add(new User(row));
                 }
-                _context.Close();
                 return users;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 return null;
-            }
-            finally
-            {
-                _context.Close();
             }
         }
 

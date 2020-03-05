@@ -3,6 +3,7 @@ using Infraestructura.Utils;
 using NUnit.Framework;
 using Domain.Entities;
 using Aplicacion.Services;
+using System.Collections.Generic;
 
 namespace TestContext
 {
@@ -32,26 +33,24 @@ namespace TestContext
         [Test]
         public void TestUserAd()
         {
-            unitOfWork.Init();
-            UserService userService = new UserService(unitOfWork.UserRepository);
+            UserService userService = new UserService(unitOfWork, unitOfWork.UserRepository);
             User user = new User
             {
                 Username = "rmrgnzlz",
                 Password = "1234",
                 Firstname = "Ramiro",
                 Lastname = "Gonzalez",
-                RoleId = 8,
+                RoleId = 1,
                 State = UserState.Active
             };
             User savedUser = userService.Create(user);
-            unitOfWork.Save();
             Assert.IsNotNull(savedUser);
         }
 
         [Test]
         public void TestUserFind()
         {
-            long id = 8;
+            long id = 1;
             User user = unitOfWork.UserRepository.Find(id);
             Assert.IsNotNull(user);
         }
@@ -59,21 +58,19 @@ namespace TestContext
         [Test]
         public void TestUserFindBy()
         {
-            unitOfWork.Init();
-            UserService userService = new UserService(unitOfWork.UserRepository);
+            UserService userService = new UserService(unitOfWork, unitOfWork.UserRepository);
             User myUser = userService.GetUser(new User
             {
                 Username = "rmrgnzlz",
-                Password = "qwertyuiop"
+                Password = "1234"
             });
-            unitOfWork.Save();
             Assert.IsNotNull(myUser);
         }
 
         [Test]
         public void TestGetUser()
         {
-            UserService userService = new UserService(unitOfWork.UserRepository);
+            UserService userService = new UserService(unitOfWork, unitOfWork.UserRepository);
             User user = new User
             {
                 Username = "rmrgnzlz",
@@ -81,6 +78,13 @@ namespace TestContext
             };
             User myUser = userService.GetUser(user);
             Assert.IsNotNull(myUser);
+        }
+
+        [Test]
+        public void TestGetPermissions()
+        {
+            IList<Permission> list = unitOfWork.PermissionRepository.GetByRole(1);
+            Assert.IsNotNull(list);
         }
     }
 }

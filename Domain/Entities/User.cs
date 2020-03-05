@@ -15,7 +15,6 @@ namespace Domain.Entities
         public UserState State { get; set; }
         public long RoleId { get; set; }
         public Role Role { get; set; }
-
         public User(IDataRecord row) : base(row)
         {
             Username = row["username"].ToString();
@@ -25,13 +24,11 @@ namespace Domain.Entities
             Lastname = row["lastname"].ToString();
             RoleId = long.Parse(row["role_id"].ToString());
         }
-
         public User()
         {
 
         }
     }
-
     public enum UserState
     {
         Inactive = 0,

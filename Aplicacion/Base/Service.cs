@@ -1,5 +1,6 @@
 ﻿using Aplicacion.Interface;
 using Infraestructura.Interfaces;
+using Infraestructura.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,10 +9,12 @@ namespace Aplicacion.Base
 {
     public abstract class Service<T> : IService<T> where T : class
     {
-        protected readonly IRespository<T> _repository;
-        public Service(IRespository<T> repository)
+        protected readonly IRepository<T> _repository;
+        protected readonly UnitOfWork _unitOfWork;
+        public Service(UnitOfWork unitOfWork, IRepository<T> repository)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
         }
         public virtual T Create(T entity)
         {
@@ -61,6 +64,20 @@ namespace Aplicacion.Base
             try
             {
                 return _repository.Find(id);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Entity error: {e.Message}");
+            }
+        }
+
+        public virtual IList<T> FindBy(string name, object value)
+        {
+            if (name.Length < 1) throw new Exception("name is null");
+            if (value is null) throw new Exception("value is null");
+            try
+            {
+                return _repository.FindBy(name, value);
             }
             catch (Exception e)
             {

@@ -11,14 +11,12 @@ namespace Domain.Entities
         public string Description { get; set; }
         public RoleState State { get; set; }
         public IEnumerable<Permission> Permissions { get; set; }
-
         public Role(IDataRecord row) : base(row)
         {
             Name = row["name"].ToString();
             State = (RoleState)Convert.ToInt32(row["state"]);
             Description = row["description"].ToString();
         }
-
         public Role()
         {
 
