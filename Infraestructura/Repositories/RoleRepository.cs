@@ -126,7 +126,7 @@ namespace Infraestructura.Repositories
             return roles;
         }
 
-        public IList<Role> GetAll(int pageIndex = 0, int pageSize = 10)
+        public IList<Role> GetAll(int pageIndex = 1, int pageSize = 10)
         {
             try
             {

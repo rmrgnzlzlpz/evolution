@@ -137,15 +137,15 @@ namespace Infraestructura.Repositories
             }
         }
 
-        public IList<User> GetAll(int pageIndex = 1, int pageSize = 10)
+        public IList<User> GetAll(int index = 1, int size = 10)
         {
             try
             {
-                int start = (pageIndex - 1) * pageSize;
+                int start = (index - 1) * size;
                 IList<User> users = new List<User>();
-                _dbCommand = new SqlCommand("SELECT * FROM dbo.users OFFSET @inicio ROWS FETCH NEXT @size ROWS ONLY");
-                _dbCommand.Parameters.AddWithValue("@inicio", start);
-                _dbCommand.Parameters.AddWithValue("@size", pageSize);
+                _dbCommand = new SqlCommand("SELECT * FROM dbo.users ORDER BY id OFFSET @start ROWS FETCH NEXT @size ROWS ONLY");
+                _dbCommand.Parameters.AddWithValue("@start", start);
+                _dbCommand.Parameters.AddWithValue("@size", size);
                 var data = _context.Select(_dbCommand);
                 foreach (var row in data)
                 {

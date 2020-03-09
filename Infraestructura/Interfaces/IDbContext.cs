@@ -3,6 +3,7 @@ using Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Text;
 
 namespace Infraestructura.Interfaces
@@ -11,10 +12,10 @@ namespace Infraestructura.Interfaces
     {
         bool Open();
         bool Close();
-        IDataRecord Insert(IDbCommand sqlCommand);
-        IDataRecord Update(IDbCommand sqlCommand);
-        IDataRecord Find(IDbCommand sqlCommand);
-        int Delete(IDbCommand sqlCommand);
-        IEnumerable<IDataRecord> Select(IDbCommand sqlCommand);
+        IDataRecord Insert(SqlCommand sqlCommand);
+        IDataRecord Update(SqlCommand sqlCommand);
+        IDataRecord Find(SqlCommand sqlCommand);
+        int Delete(SqlCommand sqlCommand);
+        IEnumerable<IDataRecord> Select(SqlCommand sqlCommand);
     }
 }

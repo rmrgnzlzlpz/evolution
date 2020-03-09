@@ -13,7 +13,7 @@ namespace Infraestructura.Utils
 {
     public class PruebaContext : IDbContext
     {
-        public readonly IDbConnection _sqlConnection;
+        public readonly SqlConnection _sqlConnection;
 
         public PruebaContext(string stringConnection)
         {
@@ -24,6 +24,7 @@ namespace Infraestructura.Utils
         {
             try
             {
+                if (_sqlConnection.State == ConnectionState.Closed) return true;
                 _sqlConnection.Close();
                 return true;
             }
@@ -37,6 +38,7 @@ namespace Infraestructura.Utils
         {
             try
             {
+                if (_sqlConnection.State == ConnectionState.Open) return true;
                 _sqlConnection.Open();
                 return true;
             }
@@ -47,19 +49,17 @@ namespace Infraestructura.Utils
             }
         }
 
-        private IEnumerable<IDataRecord> Get(IDbCommand sqlCommand)
+        private IEnumerable<IDataRecord> Get(SqlCommand sqlCommand)
         {
-            if (!Open()) yield return null;
+            if (!Open()) return null;
             sqlCommand.Connection = _sqlConnection;
-            IDataReader reader = sqlCommand.ExecuteReader();
-            while (reader.Read())
-            {
-                yield return reader;
-            }
-            Close();
+            SqlDataReader reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
+            IEnumerable<IDataRecord> dataRecord = reader.Cast<IDataRecord>().ToList();
+            reader.Close();
+            return dataRecord;
         }
 
-        public int Delete(IDbCommand sqlCommand)
+        public int Delete(SqlCommand sqlCommand)
         {
             try
             {
@@ -68,11 +68,13 @@ namespace Infraestructura.Utils
                 sqlCommand.Transaction = _sqlConnection.BeginTransaction();
                 int count = sqlCommand.ExecuteNonQuery();
                 sqlCommand.Transaction.Commit();
+                sqlCommand.Dispose();
                 return count;
             }
             catch (Exception e)
             {
                 sqlCommand.Transaction.Rollback();
+                sqlCommand.Dispose();
                 Console.WriteLine(e.Message);
                 return 0;
             }
@@ -82,22 +84,22 @@ namespace Infraestructura.Utils
             }
         }
 
-        public IDataRecord Insert(IDbCommand sqlCommand)
+        public IDataRecord Insert(SqlCommand sqlCommand)
         {
             return Get(sqlCommand).FirstOrDefault();
         }
 
-        public IDataRecord Update(IDbCommand sqlCommand)
+        public IDataRecord Update(SqlCommand sqlCommand)
         {
             return Get(sqlCommand).FirstOrDefault();
         }
 
-        public IDataRecord Find(IDbCommand sqlCommand)
+        public IDataRecord Find(SqlCommand sqlCommand)
         {
             return Get(sqlCommand).FirstOrDefault();
         }
 
-        public IEnumerable<IDataRecord> Select(IDbCommand sqlCommand)
+        public IEnumerable<IDataRecord> Select(SqlCommand sqlCommand)
         {
             return Get(sqlCommand);
         }

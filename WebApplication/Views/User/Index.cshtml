@@ -1,9 +1,29 @@
-﻿@{
-	ViewData["Title"] = "Home Page";
-	Layout = "";
+﻿@model Domain.Entities.User;
+@{
+	ViewData["Title"] = "My Account";
+	var edit = (bool)ViewData["edit"];
+	string action = "#";
+	if(edit) action = $"User/Edit/{Model.Id}";
 }
 
 <div class="text-center">
-	<h1 class="display-4">Bienvenido</h1>
-	<p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+	<h1 class="display-4">Bienvenido @Model.Firstname @Model.Lastname</h1>
 </div>
+<form method="post" action="@action">
+	<label for="username">Username</label>
+	<input class="form-control mb-4" type="text" value="@Model.Username" disabled>
+	<label for="password">Password</label>
+	<input class="form-control mb-4" type="password" name="password" id="password">
+	<label for="firstname">Firstname</label>
+	<input class="form-control mb-4" type="text" name="firstname" id="firstname" value="@Model.Firstname">
+	<label for="lastname">Lastname</label>
+	<input class="form-control mb-4" type="text" name="lastname" id="lastname" value="@Model.Lastname">
+	<label for="state">Activo</label>
+	@if (Model.State == Domain.Entities.UserState.Active)
+	{
+		<input type="checkbox" class="form-control" name="state" id="state" checked>
+	} else {
+		<input type="checkbox" class="form-control" name="state" id="state">
+	}
+	@if(edit){<button class="btn btn-info btn-block my-4" type="submit">Guardar Cambios</button>}
+</form>

@@ -1,0 +1,19 @@
+﻿#btnDeptg {
+	position: absolute;
+	z-index: 100;
+	top: 20px;
+	right: 20px;
+}
+
+.custom {
+	margin: 0;
+	padding: 0;
+	height: 800px;
+	margin-bottom: 50px;
+	border: 2px solid grey;
+}
+
+.text-info-map {
+	display: inline-block;
+	padding: 5px;
+}

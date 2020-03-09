@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -45,7 +44,11 @@ namespace WebApplication
                 };
             });
 
-            services.AddControllersWithViews();
+            services.AddDistributedMemoryCache();
+            services.AddSession(so =>
+            {
+                so.IdleTimeout = TimeSpan.FromMinutes(30);
+            });
             services.AddMvc();
         }
 
@@ -66,8 +69,8 @@ namespace WebApplication
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseSession();
             app.UseAuthorization();
-            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {

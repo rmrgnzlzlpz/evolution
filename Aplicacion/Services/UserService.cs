@@ -28,9 +28,15 @@ namespace Aplicacion.Services
             return base.Create(user);
         }
 
+        public override User Update(User entity)
+        {
+            if (entity == null) throw new Exception("User Entity empty or null");
+            entity.Password = new PasswordHasher<User>().HashPassword(entity, entity.Password);
+            return base.Update(entity);
+        }
         public bool ValidatePassword(User user, User entity)
         {
-            var verifier = new PasswordHasher<User>().VerifyHashedPassword(user, entity.Password, user.Password);
+            var verifier = new PasswordHasher<User>().VerifyHashedPassword(user, entity.Password ?? "", user.Password ?? "");
             return verifier == PasswordVerificationResult.Success;
         }
 

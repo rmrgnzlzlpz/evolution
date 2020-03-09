@@ -1,8 +1,29 @@
 ﻿@{
-    ViewData["Title"] = "Evolution";
+	ViewData["Title"] = "Home Page";
 }
+<h1>Departamentos de Colombia</h1>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<button id="infoDiv" onclick="CargarUsuario(0)" class="esri-widget">Ver usuarios</button>
+<button id="verVeredasBtn" onclick="verificarVer()" class="esri-widget">Ver veredas</button>
+<div id="viewDiv" class="custom"></div>
+<div id="instruction" class="esri-widget">
+	<span class="text-info-map">Clic en un Departamento para ver más detalles</span>
 </div>
+
+<script>
+	function CargarUsuario(page) {
+    $.ajax({
+      type: "POST",
+      url: '@Url.Action("GetAll", "User")',
+      data: {
+        pagina: page
+      },
+      success: function (result) {
+        recargarUsuarios(result,page);
+      },
+      error: function (error) {
+        alert(error);
+      }
+    });
+  }
+</script>

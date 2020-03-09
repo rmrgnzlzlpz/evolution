@@ -1,0 +1,158 @@
+@model IEnumerable<Domain.Entities.User>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div id="viewDiv" class="custom"></div>
+
+<button id="infoDiv" onclick="recargarTabla(1, 10, 1)" class="esri-widget">Ver usuarios</button>
+<button id="verVeredasBtn" onclick="verificarVer()" class="esri-widget">Ver veredas</button>
+
+<script>
+    function zoomTo() {
+        map.centerAndZoom([-72.4782449846235, 4.887407292289377], 6);
+    }
+
+    function verificarVer() {
+        if (veredas === undefined) {
+            alert("Por favor espere mientras se cargan los datos");
+            return;
+        }
+        cargarVeredas(veredas.slice(0, 10), 1);
+    }
+    
+    function recargarUsuarios(usuarios, from, to, page) {
+        if (usuarios.length > 0) {
+            var tablaUsuarios = `
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Firstname)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Lastname)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.State)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    `;
+            var d = "";
+            for (var i = 0; i < (usuarios.length < 10 ? usuarios.length : 10); i++) {
+                d += `
+                <tr>
+                    <td>${usuarios[i].firstname}</td>
+                    <td>${usuarios[i].lastname}</td>
+                    <td>${usuarios[i].state === 0?"Activo":"Inactivo"}</td>
+                </tr>`
+            }
+            tablaUsuarios += d;
+            tablaUsuarios += `
+                </tbody>
+            </table>
+            <ul class="pagination justify-content-center">
+            <li class="page-item ${page === 1 ? "disabled" : ""}"><a class="page-link btn" onclick="recargarTabla(${(page - 2) * 10}, ${(page - 2) * 10 + 10}, ${page - 1})">Anterior</a></li>
+            <li class="page-item"><a class="page-link" onclick="recargarTabla(${(page - 3) * 10}, ${(page - 3) * 10 + 10}, ${page - 2})">${page-2 < 1 ? "✕": page-2}</a></li>
+            <li class="page-item"><a class="page-link" onclick="recargarTabla(${(page - 2) * 10}, ${(page - 2) * 10 + 10}, ${page - 1})">${page-1 < 1 ? "✕" : page - 1}</a></li>
+            <li class="page-item active"><a class="page-link">${page}</a></li>
+            <li class="page-item"><a class="page-link" disabled onclick="recargarTabla(${page * 10}, ${page * 10 + 10}, ${page + 1})">${page ===  1 ? "✕": page+1}</a></li>
+            <li class="page-item"><a class="page-link" onclick="recargarTabla(${(page + 1) * 10}, ${(page + 1) * 10 + 10}, ${page + 2})">${page+1 >= 2 ? "✕": page+2}</a></li>
+            <li class="page-item ${page === 2 ? "disabled": ""}"><a class="page-link btn" onclick="recargarTabla(${page * 10}, ${page * 10 + 10}, ${page + 1})">Siguiente</a></li>
+            </ul>
+            
+            `;
+            $("#saludo").html(tablaUsuarios);
+        }
+        deptDialog.show();
+    }
+    
+    function recargarTabla(from, to, page) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetAll", "User")',
+            data: {
+                from: from,
+                to: to
+            },
+            success: function (result) {
+                console.log(result);
+                recargarUsuarios(result, from, to, page);
+            },
+            error: function (error) {
+                alert(error);
+            }
+        });
+    }
+
+    async function buscarVeredas() {
+        global.buscarVereda(document.getElementById('nomver').value);
+    }
+
+    function cargarVeredas(ver, page) {
+        if (veredas === undefined) {
+            alert("Por favor espere mientras se cargan los datos");
+        }
+        if (page > 0) {
+            var tabla = `
+        <div class="input-group input-group-sm mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-sm">Nombre de la vereda</span>
+          </div>
+          <input type="text" class="form-control" aria-label="Small" id="nomver" aria-describedby="inputGroup-sizing-sm">
+          <button style="margin-left:10px" type="button" onclick="buscarVeredas()" class="btn btn-primary btn-sm">Buscar</button>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Departamento</th>
+                    <th>Municipio</th>
+                    <th>Detalles</th>
+                </tr>
+            </thead>
+            <tbody>`;
+            var d = "";
+                for (var i = 0; i < (ver.length < 10 ? ver.length : 10); i++) {
+                    d += `
+                    <tr>
+                        <td>${ver[i].attributes.CODIGO_VER}</td>
+                        <td>${ver[i].attributes.NOMBRE_VER}</td>
+                        <td>${ver[i].attributes.NOM_DEP}</td>
+                        <td>${ver[i].attributes.NOMB_MPIO}</td>
+                        <td><a class="btn" onclick="global.verVereda('${ver[i].attributes.NOMBRE_VER}')">🔍</a></td>
+                    </tr>`
+            }
+            tabla += d;
+
+            tabla += `
+            </tbody>
+            </table>
+            <ul class="pagination justify-content-center">
+            <li class="page-item ${page === 1 ? "disabled" : ""}">
+                <a class="page-link btn" onclick="cargarVeredas(veredas.slice(${(page - 2) * 10}, ${(page - 2) * 10 + 10}), ${page - 1})">Anterior</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" onclick="cargarVeredas(veredas.slice(${(page - 3) * 10}, ${(page - 3) * 10 + 10}), ${page - 2})">${page-2 < 1 ? "✕": page-2}</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" onclick="cargarVeredas(veredas.slice(${(page - 2) * 10}, ${(page - 2) * 10 + 10}), ${page - 1})">${page-1 < 1 ? "✕" : page - 1}</a>
+            </li>
+            <li class="page-item active"><a class="page-link">${page}</a></li>
+            <li class="page-item"><a class="page-link" onclick="cargarVeredas(veredas.slice(${page * 10}, ${page * 10 + 10}), ${page + 1})">${Math.ceil(veredas.length / 10) === (page - 2) ? "✕" : page + 1}</a></li>
+            <li class="page-item"><a class="page-link" onclick="cargarVeredas(veredas.slice(${(page + 1) * 10}, ${(page + 1) * 10 + 10}), ${page + 2})">${Math.ceil(veredas.length / 10) === (page - 1) ? "✕" : page + 2}</a></li>
+            <li class="page-item ${Math.ceil(veredas.length / 10) === page ? "disabled" : ""}">
+                <a class="page-link btn" onclick="cargarVeredas(veredas.slice(${page * 10}, ${page * 10 + 10}), ${page + 1})">Siguiente</a>
+            </li>
+            </ul>
+        `;
+            $("#tablaVeredas").html(tabla);
+        }
+        verDialog.show();
+    }
+
+</script>

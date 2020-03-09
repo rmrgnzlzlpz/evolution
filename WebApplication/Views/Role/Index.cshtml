@@ -1,0 +1,16 @@
+@model IEnumerable<Domain.Entities.Role>
+@{
+	ViewData["Title"] = "Listado de Roles";
+}
+<h1>Gestión de Roles</h1>
+
+<table>
+	@foreach (Domain.Entities.Role item in Model)
+	{
+		<tr>
+      <td>@item.Name</td>
+      <td>@item.Description</td>
+      <td><a href="Role/Edit/@item.Id" class="btn btn-primary">Gestionar Permisos</a></td>
+    </tr>
+	}
+</table>
