@@ -3,8 +3,10 @@
 }
 <h1>Departamentos de Colombia</h1>
 
-<button id="infoDiv" onclick="CargarUsuario(0)" class="esri-widget">Ver usuarios</button>
-<button id="verVeredasBtn" onclick="verificarVer()" class="esri-widget">Ver veredas</button>
+<div id="buttons">
+  <button id="infoDiv" onclick="CargarUsuario(0)" class="esri-widget">Ver usuarios</button>
+  <button id="verVeredasBtn" onclick="verificarVer()" class="esri-widget">Ver veredas</button>
+</div>
 <div id="viewDiv" class="custom"></div>
 <div id="instruction" class="esri-widget">
 	<span class="text-info-map">Clic en un Departamento para ver más detalles</span>
@@ -25,5 +27,49 @@
         alert(error);
       }
     });
+  }
+
+  function ListarVeredas(veredas, pagina) {
+    if (pagina > 0) {
+      var tabla = `
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Código</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Departamento</th>
+            <th scope="col">Municipio</th>
+            <th scope="col">Detalles</th>
+          </tr>
+        </thead>
+        <tbody>`;
+        var d = "";
+        for (var i = 0; i < (veredas.length < 10 ? veredas.length : 10); i++) {
+          d += `
+          <tr>
+            <th scope="row">${i+(10*(pagina-1))}</th>
+            <th>${veredas[i].attributes.CODIGO_VER}</th>
+            <th>${veredas[i].attributes.NOMBRE_VER}</th>
+            <th>${veredas[i].attributes.NOM_DEP}</th>
+            <th>${veredas[i].attributes.NOMB_MPIO}</th>
+            <th><a class="btn btn-primary" title="Presiona Click" onclick="global.verVereda('${veredas[i].attributes.NOMBRE_VER}')">🔍</a></th>
+          </tr>`
+        }
+        tabla += d;
+        tabla += `
+        </tbody>
+        </table>
+        <ul class="pagination justify-content-centerx|">
+        <li class="page-item ${pagina === 1 ? "disabled" : ""}">
+          <a class="btn btn-primary btn-lg active" onclick="ListarVeredas(ListadoVeredas.slice(${(pagina - 2) * 10}, ${(pagina - 2) * 10 + 10}), ${pagina - 1})">Anterior</a>
+        </li>
+        <li class="page-item ${Math.ceil(ListadoVeredas.length / 10) === pagina ? "disabled" : ""}">
+          <a class="btn btn-primary btn-lg active" onclick="ListarVeredas(ListadoVeredas.slice(${pagina * 10}, ${pagina * 10 + 10}), ${pagina + 1})">Siguiente</a>
+        </li>
+        </ul>
+      `;
+      $("#tablaVeredas").html(tabla);
+    }
   }
 </script>

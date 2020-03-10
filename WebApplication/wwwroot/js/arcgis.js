@@ -1,4 +1,5 @@
 ﻿var ListadoVeredas = {};
+var global = {};
 
 /**
  * Departamentos
@@ -193,8 +194,9 @@ require([
   "esri/Graphic",
   "esri/widgets/Sketch",
   "esri/widgets/Sketch/SketchViewModel",
-  "esri/widgets/Popup"
-], function (Map, MapView, FeatureLayer, DefaultUI, BasemapToggle, Search, GraphicsLayer, Graphic, Sketch, SketchViewModel, Popup) {
+  "esri/widgets/Popup",
+  "dijit/Dialog",
+], function (Map, MapView, FeatureLayer, DefaultUI, BasemapToggle, Search, GraphicsLayer, Graphic, Sketch, SketchViewModel, Popup, Dialog) {
   let graphicsLayer = new GraphicsLayer();
 
   var map = new Map({
@@ -268,11 +270,8 @@ require([
 
   // Defines an action to zoom out from the selected feature
   var zoomOutAction = {
-    // This text is displayed as a tooltip
     title: "Zoom out",
-    // The ID by which to reference the action in the event handler
     id: "zoom-out",
-    // Sets the icon font used to style the action button
     className: "esri-icon-zoom-out-magnifying-glass"
   };
   // Adds the custom action to the popup.
@@ -366,11 +365,56 @@ require([
   view.ui.add(sketch, "top-right");
   // view.ui.add(searchWidget, "bottom-left");
   view.ui.add(toggle, "bottom-right");
-  view.ui.add("instruction", "top-left");
   map.add(FeatureDepartamento);
 
-  FeatureVereda.definitionExpression = `COD_DPTO=0`;
+  FeatureVereda.definitionExpression = "COD_DPTO=0";
   ListadoVeredas = FeatureVereda;
+  verDialog = new Dialog({
+    title: "Listado de Veredas",
+    content: "<div  id='tablaVeredas'>Cargando...</div>",
+    style: "width: 50%; position:center;",
+  });
+
+  userDialog = new Dialog({
+    title: "Listado de Usuarios",
+    content: "<div  id='tablaUsuarios'>Cargando...</div>",
+    style: "width: 50%; position:center;",
+  });
+
+  global.verVereda = function (nomVer) {
+    console.log(nomVer);
+    FeatureVereda.definitionExpression = `NOMBRE_VER='${nomVer.toUpperCase()}'`;
+    verDialog.hide();
+    FeatureVereda.queryFeatures({
+      where: `NOMBRE_VER='${nomVer.toUpperCase()}'`,
+      returnGeometry: true,
+      outFields: ["*"]
+    }).then(function (results) {
+      console.log(results);
+      view.popup.title = results.features[0].attributes.NOMBRE_VER;
+      view.popup.open({
+        location: {
+          latitude: results.features[0].geometry.centroid.latitude,
+          longitude: results.features[0].geometry.centroid.longitude
+        },
+
+        title: "Información de " + results.features[0].attributes.NOMBRE_VER,
+        content: `
+          OBJECTID: ${results.features[0].attributes.OBJECTID} <br> 
+          Código DANE departamento: ${results.features[0].attributes.DPTO_CCDGO} <br> 
+          Año de creación del departamento: ${results.features[0].attributes.DPTO_NANO_CREACION} <br> 
+          Nombre del departamento: ${results.features[0].attributes.DPTO_CNMBRE} <br> 
+          Acto administrativo de creación del departamento: ${results.features[0].attributes.DPTO_CACTO_ADMNSTRTVO} <br> 
+          Área oficial del departamento en Km2: ${results.features[0].attributes.DPTO_NAREA} <br> 
+          Año vigencia de información municipal (Fuente DANE): ${results.features[0].attributes.DPTO_NANO} <br> 
+          `
+      });
+      view.extent = results.features[0].geometry.extent.expand(1.5);
+      FeatureVereda.opacity = .75;
+    });
+  };
+
+  view.ui.add("buttons", "top-left");
   map.add(FeatureVereda);
 });
 
