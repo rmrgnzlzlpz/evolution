@@ -24,7 +24,7 @@ namespace WebApplication.Controllers
         public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _configuration = configuration;
-            _uow = new UnitOfWork();
+            _uow = new UnitOfWork(configuration.GetConnectionString("evolution"));
             _userService = new UserService(_uow, _uow.UserRepository);
             _logger = logger;
         }

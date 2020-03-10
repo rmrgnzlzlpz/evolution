@@ -9,7 +9,7 @@ namespace TestContext
 {
     public class Tests
     {
-        UnitOfWork unitOfWork = new UnitOfWork();
+        UnitOfWork unitOfWork = new UnitOfWork("Data Source=SQL5052.site4now.net;Initial Catalog=DB_A561BE_evolution;User Id=DB_A561BE_evolution_admin;Password=Ramiroe123;");
         [SetUp]
         public void Setup()
         {

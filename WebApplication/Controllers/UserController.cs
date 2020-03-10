@@ -21,7 +21,7 @@ namespace WebApplication.Controllers
         public UserController(IConfiguration configuration)
         {
             _configuration = configuration;
-            _uow = new UnitOfWork();
+            _uow = new UnitOfWork(configuration.GetConnectionString("evolution"));
             _service = new UserService(_uow, _uow.UserRepository);
         }
 

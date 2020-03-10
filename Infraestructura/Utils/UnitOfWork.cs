@@ -10,7 +10,7 @@ namespace Infraestructura.Utils
     {
         private readonly IDbContext context;
 
-        public UnitOfWork(string connection = "Data Source=localhost;Initial Catalog=evolution;Integrated Security=True")
+        public UnitOfWork(string connection)
         {
             context = new PruebaContext(connection);
         }

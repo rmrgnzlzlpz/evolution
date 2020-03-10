@@ -9,7 +9,7 @@ namespace TestContext
 {
     class TestPermission
     {
-        UnitOfWork uow = new UnitOfWork();
+        UnitOfWork uow = new UnitOfWork("Data Source=SQL5052.site4now.net;Initial Catalog=DB_A561BE_evolution;User Id=DB_A561BE_evolution_admin;Password=Ramiroe123;");
         PermissionService service;
 
         [SetUp]

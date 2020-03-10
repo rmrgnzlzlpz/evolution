@@ -21,7 +21,7 @@ namespace WebApplication.Controllers
         public Rolecontroller(IConfiguration configuration)
         {
             _configuration = configuration;
-            _uow = new UnitOfWork();
+            _uow = new UnitOfWork(configuration.GetConnectionString("evolution"));
             _service = new RoleService(_uow, _uow.RoleRepository);
         }
         
