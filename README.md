@@ -28,6 +28,14 @@ dotnet run
 ```
 
 Ahora podrás acceder al **https://localhost:5001** para tener acceso a la Api.
+_Para iniciar sesión usar los usuarios:_
+```
+rmrgnzlz
+1234
+```
+hsfa
+1234
+```
 
 ---
 ⌨️ con ❤️ basado en  [Villanuevand](https://gist.github.com/Villanuevand/6386899f70346d4580c723232524d35a#file-readme-espanol-md) 😊
