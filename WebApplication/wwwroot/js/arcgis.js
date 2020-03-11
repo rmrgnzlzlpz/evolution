@@ -1,5 +1,7 @@
-﻿var ListadoVeredas = {};
+﻿var ListadoVeredas = [];
 var global = {};
+var userDialog;
+var verDialog;
 
 /**
  * Departamentos
@@ -196,6 +198,7 @@ require([
   "esri/widgets/Sketch/SketchViewModel",
   "esri/widgets/Popup",
   "dijit/Dialog",
+  "dojo/domReady!",
 ], function (Map, MapView, FeatureLayer, DefaultUI, BasemapToggle, Search, GraphicsLayer, Graphic, Sketch, SketchViewModel, Popup, Dialog) {
   let graphicsLayer = new GraphicsLayer();
 
@@ -369,6 +372,7 @@ require([
 
   FeatureVereda.definitionExpression = "COD_DPTO=0";
   ListadoVeredas = FeatureVereda;
+
   verDialog = new Dialog({
     title: "Listado de Veredas",
     content: "<div  id='tablaVeredas'>Cargando...</div>",
@@ -378,7 +382,7 @@ require([
   userDialog = new Dialog({
     title: "Listado de Usuarios",
     content: "<div  id='tablaUsuarios'>Cargando...</div>",
-    style: "width: 50%; position:center;",
+    style: "width: 50%; position:center; background-color:white;",
   });
 
   global.verVereda = function (nomVer) {
@@ -466,7 +470,7 @@ function ListarVeredas(veredas, pagina) {
 }
 
 function verificarVer() {
-  if (ListadoVeredas === undefined) {
+  if (ListadoVeredas == []) {
     alert("Loading...");
   } else {
     ListarVeredas(ListadoVeredas.slice(0, 10), 1);

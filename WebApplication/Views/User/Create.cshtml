@@ -1,3 +1,5 @@
+@model List<Domain.Entities.Role>
+
 @{
 	ViewData["Title"] = "Sign up";
 }
@@ -10,9 +12,15 @@
 	<!-- Password -->
 	<input type="password" name="password" required maxlength="20" class="form-control mb-4" placeholder="Password">
 	<!-- Firstname -->
-	<input type="text" name="firstname" required maxlength="20" class="form-control mb-4" placeholder="Password">
+	<input type="text" name="firstname" required maxlength="20" class="form-control mb-4" placeholder="Nombre">
 	<!-- Lastname -->
-	<input type="text" name="lastname" required maxlength="20" class="form-control mb-4" placeholder="Password">
+	<input type="text" name="lastname" required maxlength="20" class="form-control mb-4" placeholder="Apellido">
+	<select id="roleid" name="roleid" class="form-control mb-4">
+		@foreach (Domain.Entities.Role role in Model)
+		{
+				<option value="@role.Id">@role.Name</option>
+		}
+	</select>
 	<!-- Sign up button -->
 	<button class="btn btn-info btn-block my-4" type="submit">Sign up</button>
 

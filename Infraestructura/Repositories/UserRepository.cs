@@ -141,8 +141,9 @@ namespace Infraestructura.Repositories
         {
             try
             {
-                int start = (index - 1) * size;
                 IList<User> users = new List<User>();
+                int start = (index - 1) * size;
+                if (start < 1) start = 0;
                 _dbCommand = new SqlCommand("SELECT * FROM dbo.users ORDER BY id OFFSET @start ROWS FETCH NEXT @size ROWS ONLY");
                 _dbCommand.Parameters.AddWithValue("@start", start);
                 _dbCommand.Parameters.AddWithValue("@size", size);

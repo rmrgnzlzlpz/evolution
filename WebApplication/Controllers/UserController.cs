@@ -15,14 +15,18 @@ namespace WebApplication.Controllers
 {
     public class UserController : Controller
     {
+        private List<string> _errors;
         private static IConfiguration _configuration;
         private readonly UnitOfWork _uow;
         private readonly UserService _service;
+        private readonly RoleService _roleService;
         public UserController(IConfiguration configuration)
         {
             _configuration = configuration;
             _uow = new UnitOfWork(configuration.GetConnectionString("evolution"));
             _service = new UserService(_uow, _uow.UserRepository);
+            _roleService = new RoleService(_uow, _uow.RoleRepository);
+            _errors = new List<string>();
         }
 
         // GET: User
@@ -43,29 +47,32 @@ namespace WebApplication.Controllers
 
         public ActionResult Login()
         {
-            return View();
+            return View(_errors);
         }
 
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
+            _errors = new List<string>();
             User user = new User { Username = username, Password = password };
             user = _service.GetUser(user);
-            return Ok(user);
-            // if (user == null) return RedirectToAction("Login", "User");
-            // if (!_service.HasPermission(user, "Iniciar Sesion")) return RedirectToAction("Unauthorized", "Home");
+            if (user == null)
+            {
+                _errors.Add("Username y/o Password incorrectos.");
+                return Login();
+            }
+            if (!_service.HasPermission(user, "Iniciar Sesion") || user.State != UserState.Active) return RedirectToAction("Unauthorized", "Home");
             HttpContext.Session.SetString("id", user.Id.ToString());
             HttpContext.Session.SetString("role", user.RoleId.ToString());
             HttpContext.Session.SetString("username", user.Username);
             HttpContext.Session.SetString("password", user.Password);
-            // return RedirectToAction("Index", "Home");
-            return Ok(user);
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
-        public IEnumerable<User> GetAll(int from, int to)
+        public IEnumerable<User> GetAll(int page)
         {
-            List<User> users = _service.GetAll(from, to - from).ToList();
+            IEnumerable<User> users = _service.GetAll(page*10 + 1, page*10+11);
             return users;
         }
 
@@ -75,18 +82,28 @@ namespace WebApplication.Controllers
             return RedirectToAction("Login", "User");
         }
 
+        [Permission("Crear Usuario")]
+        public IActionResult Create()
+        {
+            return View(_roleService.FindBy("state", 1));
+        }
+
         // POST: User/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        [Permission("Crear Usuario")]
+        public ActionResult Create(User user)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                if (_service.Create(user) != null) {
+                    return RedirectToAction(nameof(Index));
+                }
+                return RedirectToAction("Error", "Home");
             }
             catch
             {
-                return View();
+                _errors.Add("Error al guardar usuario");
+                return View(_errors);
             }
         }
 

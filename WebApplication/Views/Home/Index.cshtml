@@ -4,7 +4,7 @@
 <h1>Departamentos de Colombia</h1>
 
 <div id="buttons">
-  <button id="infoDiv" onclick="CargarUsuario(0)" class="esri-widget">Ver usuarios</button>
+  <button id="infoUser" onclick="cargarUsuario(0)" class="esri-widget">Ver usuarios</button>
   <button id="verVeredasBtn" onclick="verificarVer()" class="esri-widget">Ver veredas</button>
 </div>
 <div id="viewDiv" class="custom"></div>
@@ -13,15 +13,15 @@
 </div>
 
 <script>
-	function CargarUsuario(page) {
+	function cargarUsuario(pagina) {
     $.ajax({
       type: "POST",
       url: '@Url.Action("GetAll", "User")',
       data: {
-        pagina: page
+        page: pagina
       },
       success: function (result) {
-        recargarUsuarios(result,page);
+        recargarUsuarios(result, pagina);
       },
       error: function (error) {
         alert(error);
@@ -29,47 +29,42 @@
     });
   }
 
-  function ListarVeredas(veredas, pagina) {
-    if (pagina > 0) {
-      var tabla = `
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Código</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Departamento</th>
-            <th scope="col">Municipio</th>
-            <th scope="col">Detalles</th>
-          </tr>
-        </thead>
-        <tbody>`;
+  function recargarUsuarios(users, page) {
+    console.info("Cargando Usuarios", users);
+    if (users.length > 0) {
+        var tablaUsuarios = `
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Nombre</th>
+              <th scope="col">Apellido</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+        `;
         var d = "";
-        for (var i = 0; i < (veredas.length < 10 ? veredas.length : 10); i++) {
+        for (var i = 0; i < (users.length < 10 ? users.length : 10); i++) {
           d += `
           <tr>
-            <th scope="row">${i+(10*(pagina-1))}</th>
-            <th>${veredas[i].attributes.CODIGO_VER}</th>
-            <th>${veredas[i].attributes.NOMBRE_VER}</th>
-            <th>${veredas[i].attributes.NOM_DEP}</th>
-            <th>${veredas[i].attributes.NOMB_MPIO}</th>
-            <th><a class="btn btn-primary" title="Presiona Click" onclick="global.verVereda('${veredas[i].attributes.NOMBRE_VER}')">🔍</a></th>
+            <td>${users[i].firstname}</td>
+              <td>${users[i].lastname}</td>
+              <td>${users[i].state == 0 ? "Inactivo" : "Activo"}</td>
           </tr>`
         }
-        tabla += d;
-        tabla += `
-        </tbody>
+        tablaUsuarios += d;
+        tablaUsuarios += `
+          </tbody>
         </table>
-        <ul class="pagination justify-content-centerx|">
-        <li class="page-item ${pagina === 1 ? "disabled" : ""}">
-          <a class="btn btn-primary btn-lg active" onclick="ListarVeredas(ListadoVeredas.slice(${(pagina - 2) * 10}, ${(pagina - 2) * 10 + 10}), ${pagina - 1})">Anterior</a>
-        </li>
-        <li class="page-item ${Math.ceil(ListadoVeredas.length / 10) === pagina ? "disabled" : ""}">
-          <a class="btn btn-primary btn-lg active" onclick="ListarVeredas(ListadoVeredas.slice(${pagina * 10}, ${pagina * 10 + 10}), ${pagina + 1})">Siguiente</a>
-        </li>
+        <ul class="pagination justify-content-center">
+        <li class="page-item ${page == 0 ? "disabled" : ""}"><a class="page-link btn" onclick="cargarUsuario(${page-1})">Anterior</a></li>
+        <li class="page-item"><a class="page-link btn" onclick="cargarUsuario(1)"">1</a></li>
+        <li class="page-item ${!users ? "diabled": ""}"><a class="page-link btn" onclick="cargarUsuario(${page+1})">Siguiente</a></li>
         </ul>
-      `;
-      $("#tablaVeredas").html(tabla);
+        `;
+        $("#tablaUsuarios").html(tablaUsuarios);
+      }
+      console.warn("Dialog", userDialog);
+      userDialog.show();
     }
-  }
 </script>

@@ -85,7 +85,7 @@ namespace Aplicacion.Base
             }
         }
 
-        public virtual IEnumerable<T> GetAll(int index = 0, int size = 10)
+        public virtual IEnumerable<T> GetAll(int index = 1, int size = 10)
         {
             if (index < 0 || size < 0) throw new Exception("Paginate with negative number");
             try

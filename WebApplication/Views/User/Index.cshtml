@@ -13,11 +13,11 @@
 	<label for="username">Username</label>
 	<input class="form-control mb-4" type="text" value="@Model.Username" disabled>
 	<label for="password">Password</label>
-	<input class="form-control mb-4" type="password" name="password" id="password">
+	<input class="form-control mb-4" required maxlength="20" type="password" name="password" id="password">
 	<label for="firstname">Firstname</label>
-	<input class="form-control mb-4" type="text" name="firstname" id="firstname" value="@Model.Firstname">
+	<input class="form-control mb-4" required maxlength="20" type="text" name="firstname" id="firstname" value="@Model.Firstname">
 	<label for="lastname">Lastname</label>
-	<input class="form-control mb-4" type="text" name="lastname" id="lastname" value="@Model.Lastname">
+	<input class="form-control mb-4" required maxlength="20" type="text" name="lastname" id="lastname" value="@Model.Lastname">
 	<label for="state">Activo</label>
 	@if (Model.State == Domain.Entities.UserState.Active)
 	{

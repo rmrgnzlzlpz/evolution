@@ -21,13 +21,14 @@ namespace WebApplication.Filters
         private PermissionService _service;
         public string Permission { get; set; }
 
-        public PermissionAttribute()
+        public PermissionAttribute(string permission)
         {
             var builder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json");
             _configuration = builder.Build();
             string connectionString = _configuration.GetConnectionString("evolution");
             _uow = new UnitOfWork(connectionString);
             _service = new PermissionService(_uow, _uow.PermissionRepository);
+            Permission = permission;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
@@ -53,7 +54,8 @@ namespace WebApplication.Filters
                 context.Result = new RedirectToRouteResult(new RouteValueDictionary(new
                 {
                     controller = "Home",
-                    action = "Error"
+                    action = "Error",
+                    model = e.Message
                 }));
                 Console.WriteLine(e.Message);
             }
