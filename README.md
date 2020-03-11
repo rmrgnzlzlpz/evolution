@@ -29,9 +29,12 @@ dotnet run
 
 Ahora podrás acceder al **https://localhost:5001** para tener acceso a la Api.
 _Para iniciar sesión usar los usuarios:_
+* Admin:
 ```
 rmrgnzlz
 1234
+```
+* Contador:
 ```
 hsfa
 1234
