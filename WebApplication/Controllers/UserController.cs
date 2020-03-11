@@ -51,14 +51,14 @@ namespace WebApplication.Controllers
         {
             User user = new User { Username = username, Password = password };
             user = _service.GetUser(user);
-
-            if (user == null) return RedirectToAction("Login", "User");
+            // if (user == null) return RedirectToAction("Login", "User");
             if (!_service.HasPermission(user, "Iniciar Sesion")) return RedirectToAction("Unauthorized", "Home");
             HttpContext.Session.SetString("id", user.Id.ToString());
             HttpContext.Session.SetString("role", user.RoleId.ToString());
             HttpContext.Session.SetString("username", user.Username);
             HttpContext.Session.SetString("password", user.Password);
-            return RedirectToAction("Index", "Home");
+            // return RedirectToAction("Index", "Home");
+            return Ok(user);
         }
 
         [HttpPost]
